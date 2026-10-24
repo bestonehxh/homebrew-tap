@@ -12,7 +12,7 @@ jobs:
     env:
       HOMEBREW_GITHUB_API_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Tap this checkout
         run: brew tap bestonehxh/tap "file://$GITHUB_WORKSPACE"
@@ -26,16 +26,6 @@ jobs:
           test -d /Applications/SheepTerm.app
           codesign --verify --deep --strict /Applications/SheepTerm.app
           spctl --assess --type execute -vv /Applications/SheepTerm.app
-
-      - name: Launch and list files it creates (for zap paths)
-        timeout-minutes: 2
-        continue-on-error: true
-        run: |
-          open /Applications/SheepTerm.app || true
-          sleep 20
-          pkill -x SheepTerm || true
-          sleep 3
-          find ~/Library -maxdepth 3 \( -iname '*sheepterm*' -o -iname '*Bestchaan*' \) 2>/dev/null || true
 
       - name: Uninstall with zap
         run: brew uninstall --cask --zap bestonehxh/tap/sheepterm
