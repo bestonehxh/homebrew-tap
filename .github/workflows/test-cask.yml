@@ -9,6 +9,8 @@ on:
 jobs:
   install:
     runs-on: macos-26
+    env:
+      HOMEBREW_GITHUB_API_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
 
@@ -16,7 +18,7 @@ jobs:
         run: brew tap bestonehxh/tap "file://$GITHUB_WORKSPACE"
 
       - name: Audit
-        run: brew audit --cask --online bestonehxh/tap/sheepterm || true
+        run: brew audit --cask --online bestonehxh/tap/sheepterm
 
       - name: Install
         run: |
@@ -27,7 +29,7 @@ jobs:
 
       - name: Launch and list files it creates (for zap paths)
         run: |
-          open -a SheepTerm || true
+          open /Applications/SheepTerm.app || true
           sleep 20
           osascript -e 'quit app "SheepTerm"' || true
           sleep 3
