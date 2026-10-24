@@ -1,0 +1,37 @@
+name: Test casks
+
+on:
+  push:
+    paths: ["Casks/**", ".github/workflows/test-cask.yml"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  install:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Tap this checkout
+        run: brew tap bestonehxh/tap "file://$GITHUB_WORKSPACE"
+
+      - name: Audit
+        run: brew audit --cask --online bestonehxh/tap/sheepterm || true
+
+      - name: Install
+        run: |
+          brew install --cask bestonehxh/tap/sheepterm
+          test -d /Applications/SheepTerm.app
+          codesign --verify --deep --strict /Applications/SheepTerm.app
+          spctl --assess --type execute -vv /Applications/SheepTerm.app
+
+      - name: Launch and list files it creates (for zap paths)
+        run: |
+          open -a SheepTerm || true
+          sleep 20
+          osascript -e 'quit app "SheepTerm"' || true
+          sleep 3
+          find ~/Library -maxdepth 3 \( -iname '*sheepterm*' -o -iname '*Bestchaan*' \) 2>/dev/null || true
+
+      - name: Uninstall with zap
+        run: brew uninstall --cask --zap bestonehxh/tap/sheepterm

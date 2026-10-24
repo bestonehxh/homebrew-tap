@@ -1,0 +1,43 @@
+name: Bump SheepTerm cask
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"   # every 6 hours
+  workflow_dispatch:
+  repository_dispatch:
+    types: [sheepterm-release]
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CASK: Casks/sheepterm.rb
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check latest release
+        id: rel
+        run: |
+          tag=$(gh api repos/bestonehxh/SheepTerm/releases/latest --jq .tag_name)
+          latest=${tag#v}
+          current=$(sed -nE 's/^  version "([^"]+)"/\1/p' "$CASK")
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "current=$current latest=$latest"
+
+      - name: Update cask
+        if: steps.rel.outputs.latest != steps.rel.outputs.current
+        run: |
+          v=${{ steps.rel.outputs.latest }}
+          curl -fsSL -o app.dmg "https://github.com/bestonehxh/SheepTerm/releases/download/v$v/SheepTerm-$v.dmg"
+          sum=$(sha256sum app.dmg | cut -d' ' -f1)
+          sed -i -E "s/^  version \".*\"/  version \"$v\"/; s/^  sha256 \".*\"/  sha256 \"$sum\"/" "$CASK"
+          rm app.dmg
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "sheepterm $v"
+          git push
