@@ -1,6 +1,6 @@
 cask "sheepterm" do
-  version "6.0-3"
-  sha256 "39da613b8fee48520c6b88bd311ca7be561012e59d01acbf46720b3bc6250a98"
+  version "6.0-9"
+  sha256 "b79cc90fd4b6cddc94eedcf10ce80d8af80317d2740b01d18355a253d22903ee"
 
   url "https://github.com/bestonehxh/SheepTerm/releases/download/v#{version}/SheepTerm-#{version}.dmg"
   name "SheepTerm"
